@@ -7,7 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     name: build Node.js Docker Image and deploy to minikube
     steps:
-    - uses: actions/checkout@v2
+    # Poprawka nr 1: Używamy nowej wersji wtyczki (likwiduje żółty błąd)
+    - uses: actions/checkout@v4
     
     - name: Start minikube
       uses: medyagh/setup-minikube@master
@@ -24,8 +25,10 @@ jobs:
           docker images         
           
     - name: Deploy to minikube
-      run:
+      run: |
         kubectl apply -f k8s-node-app.yaml
+        # Poprawka nr 2: Dodajemy komendę, która każe GitHubowi poczekać, aż aplikacja faktycznie wstanie
+        kubectl rollout status deployment/nodejs-app --timeout=120s
         
     - name: Test service URLs
       run: |
